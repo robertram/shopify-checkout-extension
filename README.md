@@ -1,14 +1,28 @@
-# Shopify App Template - React Router
+# Shopify Checkout Extension
 
-This is a template for building a [Shopify app](https://shopify.dev/docs/apps/getting-started) using [React Router](https://reactrouter.com/).  It was forked from the [Shopify Remix app template](https://github.com/Shopify/shopify-app-template-remix) and converted to React Router.
+How to Use the Checkout Related Products Extension
 
-Rather than cloning this repo, follow the [Quick Start steps](https://github.com/Shopify/shopify-app-template-react-router#quick-start).
+This guide will show you how to enable and preview the Related Products Checkout Extension in your Shopify store.
 
-Visit the [`shopify.dev` documentation](https://shopify.dev/docs/api/shopify-app-react-router) for more details on the React Router app package.
+## 1. Install the App
 
-## Upgrading from Remix
+First, install the app from your Shopify store’s Apps section.
+Once the installation is complete, the extension will automatically activate.
 
-If you have an existing Remix app that you want to upgrade to React Router, please follow the [upgrade guide](https://github.com/Shopify/shopify-app-template-react-router/wiki/Upgrading-from-Remix).  Otherwise, please follow the quick start guide below.
+[Insert image of the app installation screen]
+
+## 2. Automatic Checkout Integration
+
+After the app is installed, the Related Products widget will automatically appear on your store’s Checkout page.
+You don’t need to configure anything—this extension detects the items in the cart and displays relevant product recommendations.
+
+[Insert image of the checkout page showing recommended products]
+
+## 3. Optional: Customize Your Products
+
+If you want to better control the recommendations, you can manage your related products directly in your store’s product settings.
+
+[Insert image of admin product settings if needed]
 
 ## Quick start
 

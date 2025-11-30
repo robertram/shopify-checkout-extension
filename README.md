@@ -9,20 +9,20 @@ This guide will show you how to enable and preview the Related Products Checkout
 First, install the app from your Shopify store’s Apps section.
 Once the installation is complete, the extension will automatically activate.
 
-[Insert image of the app installation screen]
+<img width="1440" height="810" alt="Screenshot 2025-11-30 at 1 20 50 PM" src="https://github.com/user-attachments/assets/f2272e31-347b-4367-9162-b44abd342e77" />
+
 
 ## 2. Automatic Checkout Integration
 
 After the app is installed, the Related Products widget will automatically appear on your store’s Checkout page.
 You don’t need to configure anything—this extension detects the items in the cart and displays relevant product recommendations.
 
-[Insert image of the checkout page showing recommended products]
+<img width="1025" height="811" alt="Screenshot 2025-11-30 at 12 37 49 PM" src="https://github.com/user-attachments/assets/d83d6789-e346-4c04-9a46-a5a18b56b599" />
+
 
 ## 3. Optional: Customize Your Products
 
 If you want to better control the recommendations, you can manage your related products directly in your store’s product settings.
-
-[Insert image of admin product settings if needed]
 
 ## Quick start
 

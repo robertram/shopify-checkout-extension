@@ -1,6 +1,3 @@
-import { useEffect } from "react";
-import { useFetcher } from "react-router";
-import { useAppBridge } from "@shopify/app-bridge-react";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
 
@@ -10,228 +7,167 @@ export const loader = async ({ request }) => {
   return null;
 };
 
-export const action = async ({ request }) => {
-  const { admin } = await authenticate.admin(request);
-  const color = ["Red", "Orange", "Yellow", "Green"][
-    Math.floor(Math.random() * 4)
-  ];
-  const response = await admin.graphql(
-    `#graphql
-      mutation populateProduct($product: ProductCreateInput!) {
-        productCreate(product: $product) {
-          product {
-            id
-            title
-            handle
-            status
-            variants(first: 10) {
-              edges {
-                node {
-                  id
-                  price
-                  barcode
-                  createdAt
-                }
-              }
-            }
-          }
-        }
-      }`,
-    {
-      variables: {
-        product: {
-          title: `${color} Snowboard`,
-        },
-      },
-    },
-  );
-  const responseJson = await response.json();
-  const product = responseJson.data.productCreate.product;
-  const variantId = product.variants.edges[0].node.id;
-  const variantResponse = await admin.graphql(
-    `#graphql
-    mutation shopifyReactRouterTemplateUpdateVariant($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {
-      productVariantsBulkUpdate(productId: $productId, variants: $variants) {
-        productVariants {
-          id
-          price
-          barcode
-          createdAt
-        }
-      }
-    }`,
-    {
-      variables: {
-        productId: product.id,
-        variants: [{ id: variantId, price: "100.00" }],
-      },
-    },
-  );
-  const variantResponseJson = await variantResponse.json();
-
-  return {
-    product: responseJson.data.productCreate.product,
-    variant: variantResponseJson.data.productVariantsBulkUpdate.productVariants,
-  };
-};
-
 export default function Index() {
-  const fetcher = useFetcher();
-  const shopify = useAppBridge();
-  const isLoading =
-    ["loading", "submitting"].includes(fetcher.state) &&
-    fetcher.formMethod === "POST";
-
-  useEffect(() => {
-    if (fetcher.data?.product?.id) {
-      shopify.toast.show("Product created");
-    }
-  }, [fetcher.data?.product?.id, shopify]);
-  const generateProduct = () => fetcher.submit({}, { method: "POST" });
-
   return (
-    <s-page heading="Shopify app template">
-      <s-button slot="primary-action" onClick={generateProduct}>
-        Generate a product
-      </s-button>
-
-      <s-section heading="Congrats on creating a new Shopify app 🎉">
+    <s-page heading="Checkout Extension">
+      <s-section heading="Product Recommendations Extension">
         <s-paragraph>
-          This embedded app template uses{" "}
-          <s-link
-            href="https://shopify.dev/docs/apps/tools/app-bridge"
-            target="_blank"
-          >
-            App Bridge
-          </s-link>{" "}
-          interface examples like an{" "}
-          <s-link href="/app/additional">additional page in the app nav</s-link>
-          , as well as an{" "}
-          <s-link
-            href="https://shopify.dev/docs/api/admin-graphql"
-            target="_blank"
-          >
-            Admin GraphQL
-          </s-link>{" "}
-          mutation demo, to provide a starting point for app development.
+          This checkout UI extension enhances the checkout experience by showing
+          customers recommended products they might also like. The extension
+          appears in the checkout flow and helps increase average order value by
+          suggesting complementary products.
         </s-paragraph>
       </s-section>
-      <s-section heading="Get started with products">
-        <s-paragraph>
-          Generate a product with GraphQL and get the JSON output for that
-          product. Learn more about the{" "}
-          <s-link
-            href="https://shopify.dev/docs/api/admin-graphql/latest/mutations/productCreate"
-            target="_blank"
-          >
-            productCreate
-          </s-link>{" "}
-          mutation in our API references.
-        </s-paragraph>
-        <s-stack direction="inline" gap="base">
-          <s-button
-            onClick={generateProduct}
-            {...(isLoading ? { loading: true } : {})}
-          >
-            Generate a product
-          </s-button>
-          {fetcher.data?.product && (
-            <s-button
-              onClick={() => {
-                shopify.intents.invoke?.("edit:shopify/Product", {
-                  value: fetcher.data?.product?.id,
-                });
-              }}
-              target="_blank"
-              variant="tertiary"
-            >
-              Edit product
-            </s-button>
-          )}
+
+      <s-section heading="How It Works">
+        <s-stack direction="block" gap="base">
+          <s-paragraph>
+            <s-text type="strong">1. Product Discovery</s-text>
+          </s-paragraph>
+          <s-paragraph>
+            When a customer reaches the checkout page, the extension automatically
+            fetches the first 5 products from your store using the Storefront API.
+            It retrieves product information including title, images, variants, and
+            pricing.
+          </s-paragraph>
+
+          <s-paragraph>
+            <s-text type="strong">2. Smart Filtering</s-text>
+          </s-paragraph>
+          <s-paragraph>
+            The extension intelligently filters out products that are already in
+            the customer&apos;s cart. This ensures customers only see products they
+            haven&apos;t added yet, providing relevant recommendations.
+          </s-paragraph>
+
+          <s-paragraph>
+            <s-text type="strong">3. Product Display</s-text>
+          </s-paragraph>
+          <s-paragraph>
+            If there are available products to recommend, the extension displays a
+            &quot;You might also like&quot; section showing:
+          </s-paragraph>
+          <s-unordered-list>
+            <s-list-item>Product image (with fallback placeholder)</s-list-item>
+            <s-list-item>Product title</s-list-item>
+            <s-list-item>Formatted price in the customer&apos;s currency</s-list-item>
+            <s-list-item>Add to cart button</s-list-item>
+          </s-unordered-list>
+
+          <s-paragraph>
+            <s-text type="strong">4. Add to Cart</s-text>
+          </s-paragraph>
+          <s-paragraph>
+            Customers can directly add the recommended product to their cart with
+            a single click. The extension handles the cart update and provides
+            visual feedback during the process.
+          </s-paragraph>
+
+          <s-paragraph>
+            <s-text type="strong">5. Error Handling</s-text>
+          </s-paragraph>
+          <s-paragraph>
+            If there&apos;s an issue adding a product to the cart, the extension
+            displays a clear error message that automatically disappears after 3
+            seconds, ensuring a smooth user experience.
+          </s-paragraph>
         </s-stack>
-        {fetcher.data?.product && (
-          <s-section heading="productCreate mutation">
-            <s-stack direction="block" gap="base">
-              <s-box
-                padding="base"
-                borderWidth="base"
-                borderRadius="base"
-                background="subdued"
-              >
-                <pre style={{ margin: 0 }}>
-                  <code>{JSON.stringify(fetcher.data.product, null, 2)}</code>
-                </pre>
-              </s-box>
-
-              <s-heading>productVariantsBulkUpdate mutation</s-heading>
-              <s-box
-                padding="base"
-                borderWidth="base"
-                borderRadius="base"
-                background="subdued"
-              >
-                <pre style={{ margin: 0 }}>
-                  <code>{JSON.stringify(fetcher.data.variant, null, 2)}</code>
-                </pre>
-              </s-box>
-            </s-stack>
-          </s-section>
-        )}
       </s-section>
 
-      <s-section slot="aside" heading="App template specs">
-        <s-paragraph>
-          <s-text>Framework: </s-text>
-          <s-link href="https://reactrouter.com/" target="_blank">
-            React Router
-          </s-link>
-        </s-paragraph>
-        <s-paragraph>
-          <s-text>Interface: </s-text>
-          <s-link
-            href="https://shopify.dev/docs/api/app-home/using-polaris-components"
-            target="_blank"
-          >
-            Polaris web components
-          </s-link>
-        </s-paragraph>
-        <s-paragraph>
-          <s-text>API: </s-text>
-          <s-link
-            href="https://shopify.dev/docs/api/admin-graphql"
-            target="_blank"
-          >
-            GraphQL
-          </s-link>
-        </s-paragraph>
-        <s-paragraph>
-          <s-text>Database: </s-text>
-          <s-link href="https://www.prisma.io/" target="_blank">
-            Prisma
-          </s-link>
-        </s-paragraph>
+      <s-section heading="Technical Details">
+        <s-stack direction="block" gap="base">
+          <s-paragraph>
+            <s-text type="strong">Extension Type:</s-text> Checkout UI Extension
+          </s-paragraph>
+          <s-paragraph>
+            <s-text type="strong">Target:</s-text>{" "}
+            <code>purchase.checkout.block.render</code>
+          </s-paragraph>
+          <s-paragraph>
+            <s-text type="strong">Framework:</s-text> Preact with Shopify UI
+            Extensions
+          </s-paragraph>
+          <s-paragraph>
+            <s-text type="strong">API Access:</s-text> Storefront API enabled for
+            product queries
+          </s-paragraph>
+          <s-paragraph>
+            <s-text type="strong">Features:</s-text>
+          </s-paragraph>
+          <s-unordered-list>
+            <s-list-item>
+              Real-time cart line monitoring to filter recommendations
+            </s-list-item>
+            <s-list-item>
+              Loading skeleton states for better perceived performance
+            </s-list-item>
+            <s-list-item>
+              Internationalization support for currency formatting
+            </s-list-item>
+            <s-list-item>
+              Responsive grid layout with product image, details, and action button
+            </s-list-item>
+          </s-unordered-list>
+        </s-stack>
       </s-section>
 
-      <s-section slot="aside" heading="Next steps">
+      <s-section heading="Extension Configuration">
+        <s-paragraph>
+          The extension is configured in{" "}
+          <code>extensions/checkout-validation/shopify.extension.toml</code>.
+          Key settings include:
+        </s-paragraph>
         <s-unordered-list>
           <s-list-item>
-            Build an{" "}
+            <code>api_version = "2025-10"</code> - Uses the latest API version
+          </s-list-item>
+          <s-list-item>
+            <code>api_access = true</code> - Enables Storefront API queries
+          </s-list-item>
+          <s-list-item>
+            <code>target = "purchase.checkout.block.render"</code> - Renders in
+            the checkout block
+          </s-list-item>
+        </s-unordered-list>
+      </s-section>
+
+      <s-section slot="aside" heading="Learn More">
+        <s-unordered-list>
+          <s-list-item>
             <s-link
-              href="https://shopify.dev/docs/apps/getting-started/build-app-example"
+              href="https://shopify.dev/docs/api/checkout-ui-extensions"
               target="_blank"
             >
-              example app
+              Checkout UI Extensions Documentation
             </s-link>
           </s-list-item>
           <s-list-item>
-            Explore Shopify&apos;s API with{" "}
             <s-link
-              href="https://shopify.dev/docs/apps/tools/graphiql-admin-api"
+              href="https://shopify.dev/docs/api/checkout-ui-extensions/latest/extension-targets-overview"
               target="_blank"
             >
-              GraphiQL
+              Extension Targets Overview
             </s-link>
           </s-list-item>
+          <s-list-item>
+            <s-link
+              href="https://shopify.dev/docs/api/checkout-ui-extensions/latest/configuration#api-access"
+              target="_blank"
+            >
+              API Access Configuration
+            </s-link>
+          </s-list-item>
+        </s-unordered-list>
+      </s-section>
+
+      <s-section slot="aside" heading="Extension Features">
+        <s-unordered-list>
+          <s-list-item>Product recommendations</s-list-item>
+          <s-list-item>Cart-aware filtering</s-list-item>
+          <s-list-item>One-click add to cart</s-list-item>
+          <s-list-item>Error handling & feedback</s-list-item>
+          <s-list-item>Loading states</s-list-item>
+          <s-list-item>Internationalization</s-list-item>
         </s-unordered-list>
       </s-section>
     </s-page>

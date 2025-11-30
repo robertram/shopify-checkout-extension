@@ -1,5 +1,5 @@
 {
-  "name": "my-test-app",
+  "name": "checkout-extension",
   "private": true,
   "scripts": {
     "build": "react-router build",
